@@ -2,7 +2,9 @@ import jwt
 import requests
 from datetime import datetime
 from dotenv import dotenv_values
+
 config = dotenv_values(".env")
+
 
 class OAuth:
     _client_id = config['CLIENT_ID']

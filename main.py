@@ -1,12 +1,47 @@
+import logging
 from oauth import OAuth
+from model.transactionlog import TransactionLog
+
+logging.basicConfig(filename='log/app.log', filemode='w', format='%(levelname)s - %(asctime)s - %(message)s',
+                    level=logging.INFO)
 
 
 def send_log():
     oauth = OAuth()
-    print(oauth.token)
+    logging.info("Started processing...")
+
+    try:
+        with open("log/transactionss.txt", "rt", encoding='utf-8') as file:
+            for line in file:
+                if not line_is_valid(line):
+                    continue
+
+                content = line.strip().split(";")
+
+                log = TransactionLog(brand=content[0],
+                                     transaction_date=content[1],
+                                     client=content[2],
+                                     amount=content[3])
+
+                print(log.__dict__)
+
+    except IOError as e:
+        logging.error(msg=str(e), exc_info=True)
+
+    logging.info("End process")
 
 
-if (__name__ == "__main__"):
+def line_is_valid(line):
+    if len(line.strip()) == 0:
+        return False
+
+    if len(line.strip().split(";")) < 4:
+        return False
+
+    return True
+
+
+if (__name__ == '__main__'):
     send_log()
 
 # token_n = 'eyJraWQiOiJiNGVIeHFZSzRDc1paNVByZDlNSVhTTzlwOGY3OURWdmwyRVlpTm55WFRBPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI3cDN0cnRhcm9oMHB2MXA3ZnNhaTE5bG1oaiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiY2FyYWRocmFzXC9jYXJkcyBjYXJhZGhyYXNcL2VmdCBjYXJhZGhyYXNcL3JlYWQgY2FyYWRocmFzXC9hanVzdGVzLWZpbmFuY2Vpcm9zIGNhcmFkaHJhc1wvdGFyaWZmIGNhcmFkaHJhc1wvc3BsaXQgY2FyYWRocmFzXC93YXJtdXAgY2FyYWRocmFzXC9hdXRob3JpemVyIGNhcmFkaHJhc1wvSW5kaXZpZHVhbHMtdjEgY2FyYWRocmFzXC9iaWxsZXQgY2FyYWRocmFzXC9pbmRpdmlkdWFsc1Bvc3QgY2FyYWRocmFzXC9waXgtYmFhcyBjYXJhZGhyYXNcL2xvY2stZnVuZHMgY2FyYWRocmFzXC93ZWJob29rIGNhcmFkaHJhc1wvZ2VuZXJhdGVkb2N1bWVudCBjYXJhZGhyYXNcL2NyeXB0IGNhcmFkaHJhc1wvcDJwdHJhbnNmZXIgY2FyYWRocmFzXC9vbW5pY2hhbm5lbCBjYXJhZGhyYXNcL3VzZXIgY2FyYWRocmFzXC9hbnRpZnJhdWQgY2FyYWRocmFzXC9kb2NrLW9uZ29pbmcgY2FyYWRocmFzXC90cmFuc3BvcnRjYXJkcyBjYXJhZGhyYXNcL3dyaXRlIGNhcmFkaHJhc1wvYmFua3RyYW5zZmVycyBjYXJhZGhyYXNcL3BheW1lbnRzIGNhcmFkaHJhc1wvcmVjaGFyZ2VzIGNhcmFkaHJhc1wvY2R0LWF1dGhvcml6ZXIgY2FyYWRocmFzXC9hY2NvdW50LXBkZiBjYXJhZGhyYXNcL2NhcnRvZXMgY2FyYWRocmFzXC9zaW5nbGUtaXNzdWVyIiwiYXV0aF90aW1lIjoxNjQzMjE2ODA0LCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9YNnNVbnZqNG4iLCJleHAiOjE2NDMyMjA0MDQsImlhdCI6MTY0MzIxNjgwNCwidmVyc2lvbiI6MiwianRpIjoiYjljNjdmZDUtNzY3Yy00OGNiLTgyYjItNWZjMGQ3YmNmOWJmIiwiY2xpZW50X2lkIjoiN3AzdHJ0YXJvaDBwdjFwN2ZzYWkxOWxtaGoifQ.1fR8P7KKgMGQDvgU4MIqUlCk74ccyq94drmwX9-hlvkS5wYYxQoRtmlNwyppzSUPcDqNWXWNhI8c1ncQXHBG7OOhmDUR4u4TVM1gdnyOWFwNqz4lwm4yVjWdawoQareg7sO01joFMuUE25-uSLLg3d-0zu4MZKrgX_CfXcSy0GL1T5ighONdJiXID7yuG6yIglh6jHG9Dat9SVwN7Rnb4KoUaPa9LvCAotL3KkYIorK0e79dkI2-hZ40sKIu30uydiI8kdo7IcGmtGVBd1T4l6i2CiGqbTtGA1v9nzNgh_T9UiEqcAO8g-2WJTsJkMzzfmzGGOpffPDvbcH4reTbIw'
