@@ -4,19 +4,22 @@ from oauth import OAuth
 from model.transaction_log import TransactionLog
 from dotenv import dotenv_values
 
-logging.basicConfig(filename='log/app.log', filemode='w', format='%(levelname)s - %(asctime)s - %(message)s',
-                    level=logging.INFO)
-
 config = dotenv_values(".env")
 oauth = OAuth()
 
 
 def send_log():
+    logging.basicConfig(filename=config['PATH_LOG_ERROR'], filemode='w', format='%(levelname)s - %(asctime)s - %(message)s',
+                        level=logging.INFO)
+
     logging.info("Started processing...")
+
     url = config['URL_LOG']
+    path_log = config['PATH_LOG']
     nro_line = 0
+
     try:
-        with open("log/transactions.txt", "rt", encoding='utf-8') as file:
+        with open(path_log, "rt", encoding='utf-8') as file:
             for line in file:
                 nro_line += 1
 
@@ -60,10 +63,10 @@ def send(url, log, nro_line):
 
 
 def reprocess(log):
-    print(log)
+    path = config['PATH_REPROCESS']
     line = log.convert_to_txt(log.brand, log.transaction_date, log.client, log.amount)
 
-    with open("log/reprocess/reprocess.txt", "a", encoding='utf-8') as file:
+    with open(path, "a", encoding='utf-8') as file:
         file.write(line + '\n')
 
 
