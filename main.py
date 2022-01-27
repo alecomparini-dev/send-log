@@ -1,18 +1,25 @@
-import logging
+import requests
+import logging as logging
 from oauth import OAuth
-from model.transactionlog import TransactionLog
+from model.transaction_log import TransactionLog
+from dotenv import dotenv_values
 
 logging.basicConfig(filename='log/app.log', filemode='w', format='%(levelname)s - %(asctime)s - %(message)s',
                     level=logging.INFO)
 
+config = dotenv_values(".env")
+oauth = OAuth()
+
 
 def send_log():
-    oauth = OAuth()
     logging.info("Started processing...")
-
+    url = config['URL_LOG']
+    nro_line = 0
     try:
-        with open("log/transactionss.txt", "rt", encoding='utf-8') as file:
+        with open("log/transactions.txt", "rt", encoding='utf-8') as file:
             for line in file:
+                nro_line += 1
+
                 if not line_is_valid(line):
                     continue
 
@@ -23,12 +30,41 @@ def send_log():
                                      client=content[2],
                                      amount=content[3])
 
-                print(log.__dict__)
+                send(url, log, nro_line)
 
     except IOError as e:
         logging.error(msg=str(e), exc_info=True)
 
-    logging.info("End process")
+    logging.info("Finished process")
+
+
+def send(url, log, nro_line):
+    headers = config_headers()
+
+    try:
+        # response = requests.get(url=url,headers=headers)
+        response = requests.delete(url=url, json=log.__dict__, headers=headers)
+        response.raise_for_status()
+
+    except requests.exceptions.RequestException as e:
+        print(str(e))
+        logging.warning(msg=f'{str(e)} - Line:{str(nro_line)} - StatusCode: {str(response.status_code)}')
+        reprocess(log)
+    except requests.exceptions.Timeout or requests.exceptions.ConnectTimeout as e:
+        print(str(e))
+        logging.warning(msg=f'{str(e)} - Line:{str(nro_line)} - StatusCode: {str(response.status_code)}')
+        reprocess(log)
+    except Exception as e:
+        print(str(e))
+        logging.error(msg=f'{str(e)} - Line:{str(nro_line)} - StatusCode: {str(response.status_code)}', exc_info=True)
+
+
+def reprocess(log):
+    print(log)
+    line = log.convert_to_txt(log.brand, log.transaction_date, log.client, log.amount)
+
+    with open("log/reprocess/reprocess.txt", "a", encoding='utf-8') as file:
+        file.write(line + '\n')
 
 
 def line_is_valid(line):
@@ -39,6 +75,13 @@ def line_is_valid(line):
         return False
 
     return True
+
+
+def config_headers():
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + oauth.token
+    }
 
 
 if (__name__ == '__main__'):
