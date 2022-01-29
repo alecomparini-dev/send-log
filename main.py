@@ -44,31 +44,30 @@ def send_log():
 
 def send(url, log, nro_line):
     headers = config_headers()
-
-    try:
-
-        response = requests.get(url=url, headers=headers)
-        # response = requests.post(url=url, json=log.__dict__, headers=headers)
-        response.raise_for_status()
-
-    except requests.exceptions.Timeout or requests.exceptions.ConnectTimeout as e:
-        print(str(e))
-        logging.warning(msg=f'{str(e)} - Line:{str(nro_line)} - StatusCode:{str(response.status_code)}')
+    response = requests.post(url=url, json=log.__dict__, headers=headers)
+    if not validate_response(log.__dict__, response, nro_line):
         reprocess(log)
-    except requests.exceptions.HTTPError as e:
-        print(str(e))
-        logging.warning(msg=f'{str(e)} - Line:{str(nro_line)} - StatusCode:{str(response.status_code)}')
-        reprocess(log)
-    except Exception as e:
-        print(str(e))
-        logging.warning(msg=f'{str(e)} - Line:{str(nro_line)}')
-        reprocess(log)
+
+
+def validate_response(req, resp, nro_line):
+
+    msg_default = f'Status:{str(resp.status_code)} - Request:{req} - Response: {str(resp.json())} - Line:{str(nro_line)} '
+
+    if 400 <= resp.status_code < 500:
+        msg = 'Request Error'
+        logging.warning(msg=f'{msg} - {msg_default}')
+        return False
+    elif 500 <= resp.status_code < 600:
+        msg = 'Server Error'
+        logging.warning(msg=f'{msg} - {msg_default}')
+        return False
+
+    return True
 
 
 def reprocess(log):
     path = config['PATH_REPROCESS']
-    line = log.convert_to_txt(log.brand, log.transaction_date, log.client, log.amount)
-
+    line = log.convert_to_txt(log.brand, log.transactionDate, log.client, log.amount)
     with open(path, "a", encoding='utf-8') as file:
         file.write(line + '\n')
 
@@ -92,4 +91,3 @@ def config_headers():
 
 if (__name__ == '__main__'):
     send_log()
-
