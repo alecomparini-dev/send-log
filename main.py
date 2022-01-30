@@ -7,7 +7,7 @@ from service.log import LogService
 from service.oauth import OAuthService
 
 config = dotenv_values(".env")
-oauth = OAuthService(config['URL_TOKEN'], config['CLIENT_ID'], config['CLIENT_SECRET'])
+oauth = OAuthService(config['URL_TOKEN'], config['AUTH_USER'], config['AUTH_PASSWORD'])
 log_service = LogService(config['URL_LOG'], oauth)
 
 

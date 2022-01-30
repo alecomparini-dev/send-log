@@ -8,13 +8,11 @@ class LogService:
         self.oauth_service = oauth_service
 
     def send_log(self, log, retry = False):
-        headers = self._config_headers()
         try:
-            response = requests.post(url=self.url, json=log.__dict__, headers=headers)
+            response = requests.post(url=self.url, json=log.__dict__, headers=self._config_headers())
 
             if response.status_code == 401 and not retry:
                 self.oauth_service.clean()
-                print("retry authentication")
                 return self.send_log(log, True)
 
             self._validate_response(log.__dict__, response)

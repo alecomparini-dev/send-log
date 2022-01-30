@@ -2,21 +2,21 @@ import requests
 
 
 class OAuthService:
-    def __init__(self, url, client_id, client_secret):
+    def __init__(self, url, user, password):
         self._token = None
         self._url = url
-        self._client_id = client_id
-        self._client_secret = client_secret
+        self._user = user
+        self._password = password
 
     def _get_new_token(self):
-        token_req_payload = {'grant_type': 'client_credentials'}
-        resp = requests.post(self._url,
-                             data=token_req_payload,
-                             verify=True,
-                             allow_redirects=False,
-                             auth=(self._client_id, self._client_secret))
+        body = {
+            'user': self._user,
+            'password': self._password
+        }
 
+        resp = requests.post(url=self._url, json=body, headers={'Content-Type': 'application/json'})
         token_resp = resp.json()
+
         return token_resp['access_token']
 
     @property
