@@ -1,3 +1,5 @@
+import time
+
 import requests
 import logging as logging
 
@@ -36,7 +38,8 @@ def process_transaction():
                 try:
                     log_service.send_log(log)
                 except Exception as e:
-                    logging.error(f'`Exception Error: {e} - Request:{str(requests)} - Line:{str(nro_line)}')
+                    print(e)
+                    logging.error(f'{e} - Request:{log.__dict__} - Line:{str(nro_line)}')
                     reprocess(log)
 
     except IOError as e:

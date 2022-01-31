@@ -13,7 +13,6 @@ class OAuthService:
             'user': self._user,
             'password': self._password
         }
-
         resp = requests.post(url=self._url, json=body, headers={'Content-Type': 'application/json'})
         token_resp = resp.json()
 
