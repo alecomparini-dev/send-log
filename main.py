@@ -38,7 +38,6 @@ def process_transaction():
                 try:
                     log_service.send_log(log)
                 except Exception as e:
-                    print(e)
                     logging.error(f'{e} - Request:{log.__dict__} - Line:{str(nro_line)}')
                     reprocess(log)
 
